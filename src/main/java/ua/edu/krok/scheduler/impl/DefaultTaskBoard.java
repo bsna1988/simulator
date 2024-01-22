@@ -1,6 +1,7 @@
 package ua.edu.krok.scheduler.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,12 @@ public class DefaultTaskBoard implements TaskBoard {
                     .filter(assignment ->
                         assignment.getTeamMember().equals(teamMember)).findAny().isEmpty())
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getFinishTime() {
+        return assignments.stream().max(Comparator.comparingInt(Assignment::getFinishTime))
+            .map(Assignment::getFinishTime).orElse(0);
     }
 
     @Override

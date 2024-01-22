@@ -10,4 +10,6 @@ public interface TaskBoard {
     List<Task> getAssignedTasksAt(int time);
 
     List<TeamMember> getFreeTeamMembers(int time);
+
+    int getFinishTime();
 }

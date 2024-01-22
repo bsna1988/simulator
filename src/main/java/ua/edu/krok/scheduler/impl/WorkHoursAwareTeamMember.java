@@ -10,8 +10,7 @@ import ua.edu.krok.scheduler.TeamMember;
 @RequiredArgsConstructor
 @Getter
 public class WorkHoursAwareTeamMember implements TeamMember {
-    private static final int MAX_WORKING_HOUR = 1000;
-    private static final int HOURS_IN_YEAR = (int) TimeUnit.DAYS.toHours(365);
+    private static final int HOURS_IN_YEAR = (int) TimeUnit.DAYS.toHours(366);
     private final int id;
     private final boolean[] workHours = new boolean[HOURS_IN_YEAR];
 
@@ -42,7 +41,7 @@ public class WorkHoursAwareTeamMember implements TeamMember {
 
     @Override
     public int whenCanStartTask(int currentTime) {
-        for (int i = currentTime; i < MAX_WORKING_HOUR; i++) {
+        for (int i = currentTime; i < HOURS_IN_YEAR; i++) {
             if (workHours[i]) {
                 return i;
             }

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import ua.edu.krok.scheduler.TeamMember;
 
 public class ScheduleAwareTeamMember implements TeamMember {
-    public static final int INIT_DAYS = 30;
+    public static final int INIT_DAYS = 365;
     private final WorkHoursAwareTeamMember delegate;
     private final int startHourInUTC;
 
