@@ -13,6 +13,7 @@ import ua.edu.krok.scheduler.Team;
 import ua.edu.krok.scheduler.impl.DAGProject;
 import ua.edu.krok.scheduler.impl.DefaultSimulator;
 import ua.edu.krok.scheduler.impl.DefaultTeam;
+import ua.edu.krok.scheduler.impl.EFTSimulator;
 import ua.edu.krok.scheduler.impl.ESTSimulator;
 import ua.edu.krok.scheduler.impl.ScheduleAwareTeamMember;
 import ua.edu.krok.scheduler.impl.TimedTask;
@@ -27,25 +28,26 @@ public class Main {
 
         RandomDAG generator = new RandomDAG();
 
+        Team team = new DefaultTeam();
+        LocalDateTime now = LocalDateTime.now();
+        team.addTeamMember(new ScheduleAwareTeamMember(1,
+            ZoneId.of("Europe/Kiev").getRules().getOffset(now), 11));
+        team.addTeamMember(
+            new ScheduleAwareTeamMember(2,
+                ZoneId.of("America/Los_Angeles").getRules().getOffset(now), 8));
+
         for (int i = 0; i < 1000; i++) {
-            simulate(defaultHistogram, estHistogram, eftHistogram, generator);
+            simulate(team, defaultHistogram, estHistogram, eftHistogram, generator);
         }
         ConsoleReporter reporter = ConsoleReporter.forRegistry(registry).build();
         reporter.report();
     }
 
-    private static void simulate(Histogram defaultHistogram, Histogram estHistogram,
+    private static void simulate(Team team, Histogram defaultHistogram, Histogram estHistogram,
                                  Histogram eftHistogram, RandomDAG generator) {
-        TaskSet<TimedTask> taskSet = generator.generate(10, 30, 25);
+        TaskSet<TimedTask> taskSet = generator.generate(10, 25, 24);
 
         //System.out.println("---Default Simulator of Distributed team---");
-        Team team = new DefaultTeam();
-        LocalDateTime now = LocalDateTime.now();
-        team.addTeamMember(new ScheduleAwareTeamMember(1,
-            ZoneId.of("Europe/Kiev").getRules().getOffset(now), 10));
-        team.addTeamMember(
-            new ScheduleAwareTeamMember(2,
-                ZoneId.of("America/Los_Angeles").getRules().getOffset(now), 9));
 
         Simulator<TimedTask> simulator1 = new DefaultSimulator();
         TaskBoard taskBoard1 = simulator1.simulate(new DAGProject<>(taskSet), team);
@@ -63,7 +65,7 @@ public class Main {
 
         //System.out.println("---EFT (timezone aware) of Distributed team---");
 
-        Simulator<TimedTask> simulator3 = new ESTSimulator();
+        Simulator<TimedTask> simulator3 = new EFTSimulator();
         TaskBoard taskBoard3 = simulator3.simulate(new DAGProject<>(taskSet), team);
 
         eftHistogram.update(taskBoard3.getFinishTime());
