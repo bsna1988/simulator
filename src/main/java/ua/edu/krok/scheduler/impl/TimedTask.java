@@ -16,6 +16,6 @@ public class TimedTask implements Task {
     }
 
     public String toString() {
-        return "Task " + id;
+        return String.format("Task %d (%dh)", id, estimatedHours);
     }
 }

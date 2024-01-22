@@ -1,15 +1,19 @@
 package ua.edu.krok.scheduler.impl;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import ua.edu.krok.scheduler.TeamMember;
 
 @RequiredArgsConstructor
+@Getter
 public class WorkHoursAwareTeamMember implements TeamMember {
     private static final int MAX_WORKING_HOUR = 1000;
+    private static final int HOURS_IN_YEAR = (int) TimeUnit.DAYS.toHours(365);
     private final int id;
-    private final boolean[] workHours = new boolean[MAX_WORKING_HOUR];
+    private final boolean[] workHours = new boolean[HOURS_IN_YEAR];
 
     public WorkHoursAwareTeamMember(int id, List<Integer> workingHoursBonds) {
         this.id = id;
