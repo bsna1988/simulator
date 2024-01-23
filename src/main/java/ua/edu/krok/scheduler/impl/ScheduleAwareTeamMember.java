@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Getter;
 import ua.edu.krok.scheduler.TeamMember;
 
+@Getter
 public class ScheduleAwareTeamMember implements TeamMember {
     public static final int INIT_DAYS = 365;
     private final WorkHoursAwareTeamMember delegate;
@@ -22,7 +24,7 @@ public class ScheduleAwareTeamMember implements TeamMember {
      * @param startHour  - working start hour
      */
     public ScheduleAwareTeamMember(int id, ZoneOffset zoneOffset, int startHour) {
-        this.startHourInUTC = (int) OffsetTime.of(LocalTime.of(startHour, 0), zoneOffset)
+        this.startHourInUTC = OffsetTime.of(LocalTime.of(startHour, 0), zoneOffset)
             .withOffsetSameInstant(ZoneOffset.UTC).getHour();
         int currentDay = startHourInUTC;
         List<Integer> timeBounds = new ArrayList<>();
@@ -34,6 +36,11 @@ public class ScheduleAwareTeamMember implements TeamMember {
             currentDay += TimeUnit.DAYS.toHours(1);
         }
         delegate = new WorkHoursAwareTeamMember(id, timeBounds);
+    }
+
+    @Override
+    public int getId() {
+        return delegate.getId();
     }
 
     @Override

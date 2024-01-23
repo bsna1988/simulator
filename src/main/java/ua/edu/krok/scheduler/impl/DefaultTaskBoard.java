@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import ua.edu.krok.scheduler.Assignment;
 import ua.edu.krok.scheduler.Task;
@@ -13,6 +14,7 @@ import ua.edu.krok.scheduler.Team;
 import ua.edu.krok.scheduler.TeamMember;
 
 
+@Getter
 @RequiredArgsConstructor
 public class DefaultTaskBoard implements TaskBoard {
     private final List<Assignment> assignments = new ArrayList<>();

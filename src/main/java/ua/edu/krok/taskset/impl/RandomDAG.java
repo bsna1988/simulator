@@ -64,7 +64,7 @@ public class RandomDAG implements TaskSetGenerator {
         });
         Writer writer = new StringWriter();
         exporter.exportGraph(graph, writer);
-       // System.out.println(writer);
+        System.out.println(writer);
 
         DAGProject<TimedTask> project = new DAGProject<>();
         for (int i = 0; i < tasksCount; i++) {

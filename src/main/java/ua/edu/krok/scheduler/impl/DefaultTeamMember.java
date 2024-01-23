@@ -1,9 +1,11 @@
 package ua.edu.krok.scheduler.impl;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import ua.edu.krok.scheduler.TeamMember;
 
 
+@Getter
 @RequiredArgsConstructor
 public class DefaultTeamMember implements TeamMember {
     private final int id;
