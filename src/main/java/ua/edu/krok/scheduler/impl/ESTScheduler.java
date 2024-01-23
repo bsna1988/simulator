@@ -5,12 +5,12 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import ua.edu.krok.scheduler.Project;
-import ua.edu.krok.scheduler.Simulator;
+import ua.edu.krok.scheduler.Scheduler;
 import ua.edu.krok.scheduler.TaskBoard;
 import ua.edu.krok.scheduler.Team;
 import ua.edu.krok.scheduler.TeamMember;
 
-public class ESTSimulator implements Simulator<TimedTask> {
+public class ESTScheduler implements Scheduler<TimedTask> {
 
     @Override
     public TaskBoard simulate(Project<TimedTask> project, Team team) {

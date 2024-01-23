@@ -3,12 +3,12 @@ package ua.edu.krok.scheduler.impl;
 import java.util.List;
 
 import ua.edu.krok.scheduler.Project;
-import ua.edu.krok.scheduler.Simulator;
+import ua.edu.krok.scheduler.Scheduler;
 import ua.edu.krok.scheduler.TaskBoard;
 import ua.edu.krok.scheduler.Team;
 import ua.edu.krok.scheduler.TeamMember;
 
-public class DefaultSimulator implements Simulator<TimedTask> {
+public class DefaultScheduler implements Scheduler<TimedTask> {
 
     @Override
     public TaskBoard simulate(Project<TimedTask> project, Team team) {
