@@ -10,10 +10,12 @@ import ua.edu.krok.scheduler.Scheduler;
 import ua.edu.krok.scheduler.TaskBoard;
 import ua.edu.krok.scheduler.TaskSet;
 import ua.edu.krok.scheduler.Team;
+import ua.edu.krok.scheduler.TeamMember;
 import ua.edu.krok.scheduler.impl.DAGProject;
 import ua.edu.krok.scheduler.impl.DefaultTeam;
 import ua.edu.krok.scheduler.impl.EFTScheduler;
 import ua.edu.krok.scheduler.impl.ESTWorkHoursUnawareScheduler;
+import ua.edu.krok.scheduler.impl.LocalTeamScheduler;
 import ua.edu.krok.scheduler.impl.ScheduleAwareTeamMember;
 import ua.edu.krok.scheduler.impl.TimedTask;
 import ua.edu.krok.taskset.impl.RandomDAG;
@@ -26,36 +28,53 @@ public class Main {
 
         RandomDAG generator = new RandomDAG();
 
-        Team team = new DefaultTeam();
+        Team distributedTeam = new DefaultTeam();
         LocalDateTime now = LocalDateTime.now();
-        team.addTeamMember(new ScheduleAwareTeamMember(1,
+        distributedTeam.addTeamMember(new ScheduleAwareTeamMember(1,
             ZoneId.of("Europe/Kiev").getRules().getOffset(now), 11));
-        team.addTeamMember(
+        distributedTeam.addTeamMember(
             new ScheduleAwareTeamMember(2,
                 ZoneId.of("America/Los_Angeles").getRules().getOffset(now), 8));
 
+        DefaultTeam sameWorkHoursTeam = new DefaultTeam();
+        for (TeamMember teamMember : distributedTeam.teamMembers()) {
+            sameWorkHoursTeam.addTeamMember(
+                new ScheduleAwareTeamMember(teamMember.getId(),
+                    ZoneId.of("Europe/Kiev").getRules().getOffset(now), 11));
+        }
+
         for (int i = 0; i < 1; i++) {
-            simulate(team, histogram1, histogram2, generator);
+            simulate(distributedTeam, sameWorkHoursTeam, histogram1, histogram2, generator);
         }
         ConsoleReporter reporter = ConsoleReporter.forRegistry(registry).build();
         reporter.report();
     }
 
-    private static void simulate(Team team, Histogram histogram1,
-                                 Histogram histogram2, RandomDAG generator) {
+    private static void simulate(Team distributedTeam,
+                                 DefaultTeam sameWorkHoursTeam,
+                                 Histogram histogram1,
+                                 Histogram histogram2,
+                                 RandomDAG generator) {
         TaskSet<TimedTask> taskSet = generator.generate(5, 5, 8);
 
-        System.out.println("---EST (timezone unaware) of Distributed team---");
+
+        System.out.println("---EST of Local team---");
+
+        Scheduler<TimedTask> scheduler0 = new LocalTeamScheduler();
+        TaskBoard taskBoard0 = scheduler0.simulate(new DAGProject<>(taskSet), sameWorkHoursTeam);
+        System.out.println(taskBoard0);
+
+        System.out.println("---EST (timezone unaware) of Distributed distributedTeam---");
 
         Scheduler<TimedTask> scheduler1 = new ESTWorkHoursUnawareScheduler();
-        TaskBoard taskBoard1 = scheduler1.simulate(new DAGProject<>(taskSet), team);
+        TaskBoard taskBoard1 = scheduler1.simulate(new DAGProject<>(taskSet), distributedTeam);
         histogram1.update(taskBoard1.getFinishTime());
         System.out.println(taskBoard1);
 
-        System.out.println("---EST (timezone aware) of Distributed team---");
+        System.out.println("---EST (timezone aware) of Distributed distributedTeam---");
 
         Scheduler<TimedTask> scheduler2 = new EFTScheduler();
-        TaskBoard taskBoard2 = scheduler2.simulate(new DAGProject<>(taskSet), team);
+        TaskBoard taskBoard2 = scheduler2.simulate(new DAGProject<>(taskSet), distributedTeam);
 
         histogram2.update(taskBoard2.getFinishTime());
         System.out.println(taskBoard2);

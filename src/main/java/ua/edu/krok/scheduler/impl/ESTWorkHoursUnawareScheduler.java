@@ -17,7 +17,6 @@ import ua.edu.krok.scheduler.TeamMember;
 
 @RequiredArgsConstructor
 public class ESTWorkHoursUnawareScheduler implements Scheduler<TimedTask> {
-
     public static final int START_HOUR = 8;
 
     @Override
