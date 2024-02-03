@@ -67,7 +67,7 @@ public class ESTWorkHoursUnawareScheduler implements Scheduler<TimedTask> {
                 .filter(ass -> ass.getTeamMember().getId() == assignment.getTeamMember().getId())
                 .map(Assignment::getFinishTime)
                 .max(naturalOrder())
-                .orElse(START_HOUR);
+                .orElse(assignment.getTeamMember().whenCanStartTask(0));
 
         Set<TimedTask> blockedByTasks = dagProject.blockedBy(assignment.getTask());
         int latestBlockedTaskFinishTime = blockedByTasks.stream().flatMap(
@@ -76,7 +76,7 @@ public class ESTWorkHoursUnawareScheduler implements Scheduler<TimedTask> {
                         adjustedAssignment -> adjustedAssignment.getTask().getId() == task.getId())
             ).map(Assignment::getFinishTime)
             .max(naturalOrder())
-            .orElse(START_HOUR);
+            .orElse(assignment.getTeamMember().whenCanStartTask(0));
 
         return Math.max(earliestPossibleStartWithoutBlocks, latestBlockedTaskFinishTime) -
             adjustedStartTime;
