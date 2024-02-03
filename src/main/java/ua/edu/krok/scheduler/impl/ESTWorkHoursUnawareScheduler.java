@@ -17,7 +17,7 @@ import ua.edu.krok.scheduler.TeamMember;
 
 @RequiredArgsConstructor
 public class ESTWorkHoursUnawareScheduler implements Scheduler<TimedTask> {
-    public static final int START_HOUR = 8;
+    public static final int START_HOUR = 9;
 
     @Override
     public TaskBoard simulate(Project<TimedTask> project, Team team) {
@@ -62,21 +62,24 @@ public class ESTWorkHoursUnawareScheduler implements Scheduler<TimedTask> {
                                                          TaskBoard adjustedTaskBoard,
                                                          Assignment assignment,
                                                          int adjustedStartTime) {
-        Set<TimedTask> blockedByTasks = dagProject.blockedBy(assignment.getTask());
-        int latestBlockedTaskFinishTime = blockedByTasks.stream().map(
-            task -> adjustedTaskBoard.getAssignments()
-                .stream().filter(
-                    adjustedAssignment -> adjustedAssignment.getTask().getId() == task.getId())
-                .max(Comparator.comparingInt(Assignment::getFinishTime))
+        int earliestPossibleStartWithoutBlocks =
+            adjustedTaskBoard.getAssignments().stream()
+                .filter(ass -> ass.getTeamMember().getId() == assignment.getTeamMember().getId())
                 .map(Assignment::getFinishTime)
-                .orElse(START_HOUR)
-        ).max(naturalOrder()).orElse(START_HOUR);
+                .max(naturalOrder())
+                .orElse(START_HOUR);
 
-        int adjustedShift = 0;
-        if (latestBlockedTaskFinishTime > adjustedStartTime) {
-            adjustedShift = latestBlockedTaskFinishTime - adjustedStartTime;
-        }
-        return adjustedShift;
+        Set<TimedTask> blockedByTasks = dagProject.blockedBy(assignment.getTask());
+        int latestBlockedTaskFinishTime = blockedByTasks.stream().flatMap(
+                task -> adjustedTaskBoard.getAssignments()
+                    .stream().filter(
+                        adjustedAssignment -> adjustedAssignment.getTask().getId() == task.getId())
+            ).map(Assignment::getFinishTime)
+            .max(naturalOrder())
+            .orElse(START_HOUR);
+
+        return Math.max(earliestPossibleStartWithoutBlocks, latestBlockedTaskFinishTime) -
+            adjustedStartTime;
     }
 
     private TaskBoard scheduleSameWorkHoursTeam(Project<TimedTask> project, AtomicInteger time,

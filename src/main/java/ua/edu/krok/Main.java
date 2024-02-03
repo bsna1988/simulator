@@ -43,7 +43,7 @@ public class Main {
                     ZoneId.of("Europe/Kiev").getRules().getOffset(now), 11));
         }
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 1000; i++) {
             simulate(distributedTeam, sameWorkHoursTeam, histogram1, histogram2, generator);
         }
         ConsoleReporter reporter = ConsoleReporter.forRegistry(registry).build();
