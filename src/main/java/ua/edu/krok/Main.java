@@ -78,5 +78,31 @@ public class Main {
 
         histogram2.update(taskBoard2.getFinishTime());
         System.out.println(taskBoard2);
+
+
+        printEmployeeAssignments(taskBoard0, 0, 1);
+        printEmployeeAssignments(taskBoard0, 0, 2);
+
+        printEmployeeAssignments(taskBoard1, 1, 1);
+        printEmployeeAssignments(taskBoard1, 1, 2);
+
+        printEmployeeAssignments(taskBoard2, 2, 1);
+        printEmployeeAssignments(taskBoard2, 2, 2);
+    }
+
+    private static void printEmployeeAssignments(TaskBoard taskBoard1, int boardId,
+                                                 int employeeId) {
+        System.out.println("const e_" + boardId + "_" + employeeId + "=`");
+        taskBoard1.getAssignments().stream()
+            .filter(assignment -> assignment.getTeamMember().getId() == employeeId)
+            .forEach(assignment -> {
+                TimedTask task = (TimedTask) assignment.getTask();
+                System.out.println(
+                    assignment.getTask().getId() + "," +
+                        task.getEstimatedHours() + "," +
+                        assignment.getStartTime() + "," +
+                        assignment.getFinishTime() + "");
+            });
+        System.out.println("`;");
     }
 }
