@@ -23,6 +23,7 @@ import ua.edu.krok.taskset.impl.RandomDAG;
 public class Main {
     public static void main(String[] args) {
         MetricRegistry registry = new MetricRegistry();
+        Histogram histogram0 = registry.histogram("est (local)");
         Histogram histogram1 = registry.histogram("est (unaware)");
         Histogram histogram2 = registry.histogram("est (aware)");
 
@@ -44,7 +45,8 @@ public class Main {
         }
 
         for (int i = 0; i < 1000; i++) {
-            simulate(distributedTeam, sameWorkHoursTeam, histogram1, histogram2, generator);
+            simulate(distributedTeam, sameWorkHoursTeam, histogram0, histogram1, histogram2,
+                generator);
         }
         ConsoleReporter reporter = ConsoleReporter.forRegistry(registry).build();
         reporter.report();
@@ -52,6 +54,7 @@ public class Main {
 
     private static void simulate(Team distributedTeam,
                                  DefaultTeam sameWorkHoursTeam,
+                                 Histogram histogram0,
                                  Histogram histogram1,
                                  Histogram histogram2,
                                  RandomDAG generator) {
@@ -62,6 +65,7 @@ public class Main {
 
         Scheduler<TimedTask> scheduler0 = new LocalTeamScheduler();
         TaskBoard taskBoard0 = scheduler0.simulate(new DAGProject<>(taskSet), sameWorkHoursTeam);
+        histogram0.update(taskBoard0.getFinishTime());
         System.out.println(taskBoard0);
 
         System.out.println("---EST (timezone unaware) of Distributed distributedTeam---");

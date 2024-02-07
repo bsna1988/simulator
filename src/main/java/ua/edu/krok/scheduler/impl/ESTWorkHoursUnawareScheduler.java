@@ -39,16 +39,17 @@ public class ESTWorkHoursUnawareScheduler implements Scheduler<TimedTask> {
                     .findFirst().orElseThrow();
             int workScheduleAdjustmentHours = teamMember.getStartHourInUTC() - START_HOUR;
             int adjustedStartTime = assignment.getStartTime() + workScheduleAdjustmentHours;
-            int adjustedFinishHour = assignment.getFinishTime() + workScheduleAdjustmentHours;
             int adjustedShift =
                 calculateShiftDueToBlockedByTasks(dagProject, adjustedTaskBoard, assignment,
                     adjustedStartTime);
 
             adjustedStartTime = teamMember.whenCanStartTask(adjustedStartTime + adjustedShift);
-            adjustedFinishHour = teamMember.whenCanStartTask(adjustedFinishHour + adjustedShift);
+            TimedTask task = (TimedTask) assignment.getTask();
+            int adjustedFinishHour =
+                teamMember.whenCanFinishTask(adjustedStartTime, task.getEstimatedHours());
 
             Assignment adjustedAssignment =
-                new DefaultAssignment(teamMember, assignment.getTask(),
+                new DefaultAssignment(teamMember, task,
                     adjustedStartTime,
                     adjustedFinishHour);
 

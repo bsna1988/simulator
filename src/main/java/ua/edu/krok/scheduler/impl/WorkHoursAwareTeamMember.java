@@ -53,4 +53,8 @@ public class WorkHoursAwareTeamMember implements TeamMember {
     public String toString() {
         return "Team Member " + id;
     }
+
+    public boolean isWorkingHour(int hour) {
+        return workHours[hour];
+    }
 }

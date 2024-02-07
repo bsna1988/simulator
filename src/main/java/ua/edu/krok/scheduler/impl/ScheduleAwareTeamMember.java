@@ -58,4 +58,8 @@ public class ScheduleAwareTeamMember implements TeamMember {
         return String.format("Team Member %d [%d-%d]", delegate.getId(), startHourInUTC,
             startHourInUTC + 9);
     }
+
+    public boolean isWorkingHour(int hour) {
+        return delegate.isWorkingHour(hour);
+    }
 }
