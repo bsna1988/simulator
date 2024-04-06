@@ -31,16 +31,15 @@ public class EFTScheduler implements Scheduler<TimedTask> {
                                 task.getEstimatedHours())))
                         .filter(teamMember -> teamMember.whenCanStartTask(time.get()) == time.get())
                         .findFirst();
-                if (teamMemberWhoCanStartNow.isPresent()) {
-                    taskBoard.addAssignment(
-                        new DefaultAssignment(teamMemberWhoCanStartNow.get(), task,
-                            teamMemberWhoCanStartNow.get().whenCanStartTask(time.get()),
-                            teamMemberWhoCanStartNow.get()
-                                .whenCanFinishTask(time.get(), task.getEstimatedHours())));
-                    continue;
-                }
+                teamMemberWhoCanStartNow.ifPresentOrElse(teamMember -> taskBoard.addAssignment(
+                        new DefaultAssignment(teamMember, task,
+                            teamMember.whenCanStartTask(time.get()),
+                            teamMember
+                                .whenCanFinishTask(time.get(), task.getEstimatedHours()))),
+                    time::incrementAndGet);
+            } else {
+                time.incrementAndGet();
             }
-            time.incrementAndGet();
         }
 
         return taskBoard;
