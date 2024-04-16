@@ -1,9 +1,10 @@
 package ua.edu.krok;
 
+import static java.util.stream.Collectors.joining;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 
-import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import ua.edu.krok.scheduler.Scheduler;
@@ -24,12 +25,14 @@ public class Main {
 
     public static final String CALIFORNIA = "GMT-7";
     public static final String EASTERN_EUROPE = "GMT+1";
+    public static final String ASIA = "GMT+6";
+    public static final int MAX_EDGE_FACTOR = 3;
 
     public static void main(String[] args) {
         MetricRegistry registry = new MetricRegistry();
-        Histogram histogram0 = registry.histogram("est (local)");
-        Histogram histogram1 = registry.histogram("est (unaware)");
-        Histogram histogram2 = registry.histogram("est (aware)");
+        Histogram localHistogram = registry.histogram("est (local)");
+        Histogram twoPhaseHistogram = registry.histogram("est (unaware)");
+        Histogram proposedApproachhistogram = registry.histogram("est (aware)");
 
         RandomDAG generator = new RandomDAG();
 
@@ -43,7 +46,7 @@ public class Main {
             ZoneId.of(EASTERN_EUROPE).getRules().getOffset(now), 9));
 
         distributedTeam.addTeamMember(
-            new ScheduleAwareTeamMember(4,
+            new ScheduleAwareTeamMember(MAX_EDGE_FACTOR,
                 ZoneId.of(CALIFORNIA).getRules().getOffset(now), 9));
         distributedTeam.addTeamMember(
             new ScheduleAwareTeamMember(5,
@@ -59,19 +62,34 @@ public class Main {
                     ZoneId.of(EASTERN_EUROPE).getRules().getOffset(now), 9));
         }
 
-        for (int i = 0; i < 100; i++) {
-            System.out.println("Project " + i);
-            simulate(distributedTeam, sameWorkHoursTeam, histogram0, histogram1, histogram2,
-                generator);
+
+        double[] proposedApproachMeanDurations = new double[MAX_EDGE_FACTOR];
+        double[] twoPhaseMeanDurations = new double[MAX_EDGE_FACTOR];
+        double[] localMeanDurations = new double[MAX_EDGE_FACTOR];
+
+        for (int edgeFactor = 1; edgeFactor <= MAX_EDGE_FACTOR; edgeFactor++) {
+            for (int i = 0; i < 100; i++) {
+                System.out.println("Project " + i);
+                simulate(distributedTeam, sameWorkHoursTeam, localHistogram, twoPhaseHistogram,
+                    proposedApproachhistogram,
+                    generator, edgeFactor);
+            }
+            proposedApproachMeanDurations[edgeFactor - 1] =
+                proposedApproachhistogram.getSnapshot().getMean();
+            twoPhaseMeanDurations[edgeFactor - 1] = twoPhaseHistogram.getSnapshot().getMean();
+            localMeanDurations[edgeFactor - 1] = localHistogram.getSnapshot().getMean();
         }
-        ConsoleReporter reporter = ConsoleReporter.forRegistry(registry).build();
-        reporter.report();
-        System.out.println(String.format("means = [%.2f, %.2f, %.2f]",
-            histogram2.getSnapshot().getMean(),
-            histogram1.getSnapshot().getMean(), histogram0.getSnapshot().getMean()));
-        System.out.println(String.format("stddevs = [%.2f, %.2f, %.2f]",
-            histogram2.getSnapshot().getStdDev(),
-            histogram1.getSnapshot().getStdDev(), histogram0.getSnapshot().getStdDev()));
+
+        System.out.println(
+            "proposedApproachMeanDurations = [" + asString(proposedApproachMeanDurations) + "]");
+        System.out.println("twoPhaseMeanDurations = [" + asString(twoPhaseMeanDurations) + "]");
+        System.out.println("localMeanDurations = [" + asString(localMeanDurations) + "]");
+
+    }
+
+    private static String asString(double[] mean_durations1) {
+        return Arrays.stream(mean_durations1).mapToObj(mean -> String.format("%.2f", mean))
+            .collect(joining(","));
     }
 
     private static void simulate(Team distributedTeam,
@@ -79,8 +97,8 @@ public class Main {
                                  Histogram histogram0,
                                  Histogram histogram1,
                                  Histogram histogram2,
-                                 RandomDAG generator) {
-        TaskSet<TimedTask> taskSet = generator.generate(15, 15, 8);
+                                 RandomDAG generator, int edgeFactor) {
+        TaskSet<TimedTask> taskSet = generator.generate(15, 15 * edgeFactor, 24);
 
 
         System.out.println("---EST of Local team---");
@@ -88,14 +106,14 @@ public class Main {
         Scheduler<TimedTask> scheduler0 = new LocalTeamScheduler();
         TaskBoard taskBoard0 = scheduler0.simulate(new DAGProject<>(taskSet), sameWorkHoursTeam);
         histogram0.update(taskBoard0.getFinishTime());
-        //   System.out.println(taskBoard0);
+        System.out.println(taskBoard0);
 
         System.out.println("---EST (timezone unaware) of Distributed distributedTeam---");
 
         Scheduler<TimedTask> scheduler1 = new ESTWorkHoursUnawareScheduler();
         TaskBoard taskBoard1 = scheduler1.simulate(new DAGProject<>(taskSet), distributedTeam);
         histogram1.update(taskBoard1.getFinishTime());
-        //   System.out.println(taskBoard1);
+        System.out.println(taskBoard1);
 
         System.out.println("---EST (timezone aware) of Distributed distributedTeam---");
 
@@ -103,32 +121,7 @@ public class Main {
         TaskBoard taskBoard2 = scheduler2.simulate(new DAGProject<>(taskSet), distributedTeam);
 
         histogram2.update(taskBoard2.getFinishTime());
-        //   System.out.println(taskBoard2);
-
-
-        //printEmployeeAssignments(taskBoard0, 0, 1);
-        //printEmployeeAssignments(taskBoard0, 0, 2);
-
-        //printEmployeeAssignments(taskBoard1, 1, 1);
-        //printEmployeeAssignments(taskBoard1, 1, 2);
-
-        //printEmployeeAssignments(taskBoard2, 2, 1);
-        //printEmployeeAssignments(taskBoard2, 2, 2);
+        System.out.println(taskBoard2);
     }
 
-    private static void printEmployeeAssignments(TaskBoard taskBoard1, int boardId,
-                                                 int employeeId) {
-        System.out.println("const e_" + boardId + "_" + employeeId + "=`");
-        taskBoard1.getAssignments().stream()
-            .filter(assignment -> assignment.getTeamMember().getId() == employeeId)
-            .forEach(assignment -> {
-                TimedTask task = (TimedTask) assignment.getTask();
-                System.out.println(
-                    assignment.getTask().getId() + "," +
-                        task.getEstimatedHours() + "," +
-                        assignment.getStartTime() + "," +
-                        assignment.getFinishTime() + "");
-            });
-        System.out.println("`;");
-    }
 }

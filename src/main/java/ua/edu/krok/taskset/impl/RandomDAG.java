@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Supplier;
 
 import org.jgrapht.graph.DefaultEdge;
@@ -19,16 +20,20 @@ import ua.edu.krok.scheduler.impl.TimedTask;
 import ua.edu.krok.taskset.TaskSetGenerator;
 
 public class RandomDAG implements TaskSetGenerator {
+    private static final int[] FIBONACI = {1, 2, 3, 5, 8};
+    private static final Random RANDOM = new Random();
 
     @Override
-    public TaskSet<TimedTask> generate(int tasksCount, int edgesCount, int maxEstimatedTime) {
+    public TaskSet<TimedTask> generate(int tasksCount, int edgesCount,
+                                       int maxEstimatedTimeInHours) {
         // Create the VertexFactory so the generator can create vertices
         Supplier<TimedTask> vSupplier = new Supplier<>() {
             private int id = 0;
 
             @Override
             public TimedTask get() {
-                int estimatedTime = Math.max((int) (Math.random() * maxEstimatedTime), 1);
+                int velocityHours = maxEstimatedTimeInHours / FIBONACI[FIBONACI.length - 1];
+                int estimatedTime = FIBONACI[RANDOM.nextInt(FIBONACI.length)] * velocityHours;
                 return new TimedTask(id++, estimatedTime);
             }
         };
