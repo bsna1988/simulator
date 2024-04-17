@@ -58,8 +58,7 @@ public class RandomDAG implements TaskSetGenerator {
             }
         }
 
-        DOTExporter<TimedTask, DefaultEdge> exporter =
-            new DOTExporter<>(v -> v.getId() + "");
+        DOTExporter<TimedTask, DefaultEdge> exporter = new DOTExporter<>(v -> v.getId() + "");
         exporter.setVertexAttributeProvider((v) -> {
             Map<String, Attribute> map = new LinkedHashMap<>();
             map.put("label",
