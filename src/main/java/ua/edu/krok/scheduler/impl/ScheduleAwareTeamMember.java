@@ -33,7 +33,7 @@ public class ScheduleAwareTeamMember implements TeamMember {
             timeBounds.add(currentDay + 4);
             timeBounds.add(currentDay + 5);
             timeBounds.add(currentDay + 9);
-            currentDay += TimeUnit.DAYS.toHours(1);
+            currentDay += (int) TimeUnit.DAYS.toHours(1);
         }
         delegate = new WorkHoursAwareTeamMember(id, timeBounds);
     }

@@ -41,13 +41,14 @@ public class Example1 {
         }
         DAGProject<TimedTask> project = new DAGProject<>();
         TimedTask task1 = new TimedTask(1, 4);
-        TimedTask task2 = new TimedTask(2, 10);
-        TimedTask task3 = new TimedTask(3, 2);
+        TimedTask task2 = new TimedTask(2, 12);
+        TimedTask task3 = new TimedTask(3, 4);
+        TimedTask task4 = new TimedTask(4, 2);
 
         project.addTask(task1, Collections.emptySet());
-        project.addTask(task2, Collections.emptySet());
-        project.addTask(task3, new HashSet<>(Arrays.asList(task1, task2)));
-
+        project.addTask(task2, Collections.singleton(task1));
+        project.addTask(task3, Collections.emptySet());
+        project.addTask(task4, new HashSet<>(Arrays.asList(task2, task3)));
 
         simulate(distributedTeam, sameWorkHoursTeam, project);
 
@@ -98,7 +99,7 @@ public class Example1 {
                     assignment.getTask().getId() + "," +
                         task.getEstimatedHours() + "," +
                         assignment.getStartTime() + "," +
-                        assignment.getFinishTime() + "");
+                        assignment.getFinishTime());
             });
         System.out.println("`;");
     }

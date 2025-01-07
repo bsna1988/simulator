@@ -27,6 +27,11 @@ public class WorkHoursAwareTeamMember implements TeamMember {
     }
 
     @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
 
     public int whenCanFinishTask(int currentTime, int taskEstimateHours) {
         int finishTime = currentTime;

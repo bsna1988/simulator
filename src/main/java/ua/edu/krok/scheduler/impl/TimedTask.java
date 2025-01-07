@@ -18,4 +18,13 @@ public class TimedTask implements Task {
     public String toString() {
         return String.format("Task %d (%dh)", id, estimatedHours);
     }
+
+    public int getEstimatedHours() {
+        return estimatedHours;
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
 }

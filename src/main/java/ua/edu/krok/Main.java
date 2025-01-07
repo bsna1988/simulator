@@ -39,14 +39,14 @@ public class Main {
         Team distributedTeam = new DefaultTeam();
         LocalDateTime now = LocalDateTime.now();
         distributedTeam.addTeamMember(new ScheduleAwareTeamMember(1,
-            ZoneId.of(EASTERN_EUROPE).getRules().getOffset(now), 9));
+            ZoneId.of(ASIA).getRules().getOffset(now), 9));
         distributedTeam.addTeamMember(new ScheduleAwareTeamMember(2,
-            ZoneId.of(EASTERN_EUROPE).getRules().getOffset(now), 9));
+            ZoneId.of(ASIA).getRules().getOffset(now), 9));
         distributedTeam.addTeamMember(new ScheduleAwareTeamMember(3,
-            ZoneId.of(EASTERN_EUROPE).getRules().getOffset(now), 9));
+            ZoneId.of(ASIA).getRules().getOffset(now), 9));
 
         distributedTeam.addTeamMember(
-            new ScheduleAwareTeamMember(MAX_EDGE_FACTOR,
+            new ScheduleAwareTeamMember(4,
                 ZoneId.of(CALIFORNIA).getRules().getOffset(now), 9));
         distributedTeam.addTeamMember(
             new ScheduleAwareTeamMember(5,
@@ -59,7 +59,7 @@ public class Main {
         for (TeamMember teamMember : distributedTeam.teamMembers()) {
             sameWorkHoursTeam.addTeamMember(
                 new ScheduleAwareTeamMember(teamMember.getId(),
-                    ZoneId.of(EASTERN_EUROPE).getRules().getOffset(now), 9));
+                    ZoneId.of(ASIA).getRules().getOffset(now), 9));
         }
 
 
